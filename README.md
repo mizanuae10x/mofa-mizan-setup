@@ -1,21 +1,21 @@
-# ⚖️ MOFA OpenClaw Setup
+# ⚖️ MOFA Mizan Framework Setup
 
 **التمكن والريادة لخدمات الذكاء الاصطناعي**
-نشر OpenClaw على Mac Mini لوزارة الخارجية
+نشر إطار عمل ميزان على Mac Mini لوزارة الخارجية
 
 ---
 
 ## التثبيت — أمر واحد
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/mizanuae10x/mofa-openclaw-setup/main/setup.sh | bash
+curl -fsSL https://raw.githubusercontent.com/mizanuae10x/mofa-mizan-setup/main/setup.sh | bash
 ```
 
 ## أو تحميل يدوي
 
 ```bash
-git clone https://github.com/mizanuae10x/mofa-openclaw-setup
-cd mofa-openclaw-setup
+git clone https://github.com/mizanuae10x/mofa-mizan-setup
+cd mofa-mizan-setup
 bash setup.sh
 ```
 
@@ -47,7 +47,7 @@ openclaw channels login --channel telegram
 |--------|--------|
 | ✅ Homebrew | مدير الحزم لـ macOS |
 | ✅ Node.js 22 | بيئة التشغيل |
-| ✅ OpenClaw | المنصة الرئيسية |
+| ✅ Mizan Framework | المنصة الرئيسية |
 | ✅ git, jq, python3, ffmpeg | أدوات مساعدة |
 | ✅ SOUL.md | هوية MOFA |
 | ✅ openclaw.json | إعدادات الوكلاء |

@@ -1,8 +1,8 @@
 #!/bin/bash
 # ================================================================
-# ⚖️ MOFA OpenClaw Setup Script v2
+# ⚖️ MOFA Mizan Framework Setup Script v2
 # التمكن والريادة لخدمات الذكاء الاصطناعي
-# وزارة الخارجية — نشر OpenClaw على Mac Mini
+# وزارة الخارجية — نشر إطار عمل ميزان على Mac Mini
 # ================================================================
 
 set -e
@@ -10,7 +10,7 @@ GREEN='\033[0;32m'; GOLD='\033[0;33m'; RED='\033[0;31m'; NC='\033[0m'
 
 echo -e "${GOLD}"
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║   ⚖️  MOFA OpenClaw Setup v2 — TamkeenAI            ║"
+echo "║   ⚖️  MOFA Mizan Framework Setup v2 — TamkeenAI            ║"
 echo "║   التمكن والريادة لخدمات الذكاء الاصطناعي          ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo -e "${NC}"
@@ -53,13 +53,13 @@ else
 fi
 
 # ── 3. OpenClaw ───────────────────────────────────────────────
-echo -e "${GREEN}[3/8] تثبيت OpenClaw...${NC}"
+echo -e "${GREEN}[3/8] تثبيت Mizan Framework...${NC}"
 
 NPM_BIN=$(npm config get prefix 2>/dev/null)/bin
 export PATH="$NPM_BIN:$PATH"
 
 if ! command -v openclaw &>/dev/null; then
-    echo "  📦 تثبيت openclaw..."
+    echo "  📦 تثبيت Mizan Framework..."
     npm install -g openclaw
     # Reload PATH after npm global install
     export PATH="$(npm config get prefix)/bin:$PATH"
@@ -68,7 +68,7 @@ fi
 
 # Verify openclaw is accessible
 if command -v openclaw &>/dev/null; then
-    echo "  ✅ OpenClaw $(openclaw --version 2>/dev/null | head -1)"
+    echo "  ✅ Mizan Framework $(openclaw --version 2>/dev/null | head -1)"
 else
     echo -e "${RED}  ❌ openclaw لم يُثبَّت بشكل صحيح${NC}"
     echo "  📍 جرّب: source ~/.zprofile && openclaw --version"
