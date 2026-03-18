@@ -1,6 +1,6 @@
 #!/bin/bash
 # ================================================================
-# ⚖️ MOFA OpenClaw Setup Script
+# ⚖️ MOFA OpenClaw Setup Script v2
 # التمكن والريادة لخدمات الذكاء الاصطناعي
 # وزارة الخارجية — نشر OpenClaw على Mac Mini
 # ================================================================
@@ -10,40 +10,69 @@ GREEN='\033[0;32m'; GOLD='\033[0;33m'; RED='\033[0;31m'; NC='\033[0m'
 
 echo -e "${GOLD}"
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║   ⚖️  MOFA OpenClaw Setup — TamkeenAI               ║"
+echo "║   ⚖️  MOFA OpenClaw Setup v2 — TamkeenAI            ║"
 echo "║   التمكن والريادة لخدمات الذكاء الاصطناعي          ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
 WORKSPACE="$HOME/.openclaw/workspace"
-TAMKEEN_REPO="https://github.com/mizanuae10x/mizan-framework"
+TAMKEEN_REPO="https://github.com/mizanuae10x/mofa-diplomatic-council"
 
 # ── 1. Homebrew ───────────────────────────────────────────────
 echo -e "${GREEN}[1/8] تثبيت Homebrew...${NC}"
 if ! command -v brew &>/dev/null; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+    # Add to PATH immediately for Apple Silicon and Intel
+    if [[ -f /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
+    else
+        eval "$(/usr/local/bin/brew shellenv)"
+        echo 'eval "$(/usr/local/bin/brew shellenv)"' >> ~/.zprofile
+    fi
 else
-    echo "  ✅ Homebrew موجود"
+    echo "  ✅ Homebrew موجود: $(brew --version | head -1)"
+    # Ensure brew is in PATH
+    if [[ -f /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
 fi
 
 # ── 2. Node.js ────────────────────────────────────────────────
 echo -e "${GREEN}[2/8] تثبيت Node.js 22...${NC}"
-if ! command -v node &>/dev/null || [[ $(node -v | cut -d. -f1 | tr -d 'v') -lt 22 ]]; then
+if ! command -v node &>/dev/null || [[ $(node -v 2>/dev/null | cut -d. -f1 | tr -d 'v') -lt 22 ]]; then
     brew install node@22
-    echo 'export PATH="/opt/homebrew/opt/node@22/bin:$PATH"' >> ~/.zprofile
-    export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
+    # Add node@22 to PATH immediately
+    NODE_PATH="/opt/homebrew/opt/node@22/bin"
+    [[ -d /usr/local/opt/node@22/bin ]] && NODE_PATH="/usr/local/opt/node@22/bin"
+    export PATH="$NODE_PATH:$PATH"
+    echo "export PATH=\"$NODE_PATH:\$PATH\"" >> ~/.zprofile
+    echo "  ✅ Node.js $(node -v) مُثبَّت"
 else
     echo "  ✅ Node.js $(node -v) موجود"
 fi
 
 # ── 3. OpenClaw ───────────────────────────────────────────────
 echo -e "${GREEN}[3/8] تثبيت OpenClaw...${NC}"
+
+NPM_BIN=$(npm config get prefix 2>/dev/null)/bin
+export PATH="$NPM_BIN:$PATH"
+
 if ! command -v openclaw &>/dev/null; then
+    echo "  📦 تثبيت openclaw..."
     npm install -g openclaw
+    # Reload PATH after npm global install
+    export PATH="$(npm config get prefix)/bin:$PATH"
+    hash -r 2>/dev/null || true
+fi
+
+# Verify openclaw is accessible
+if command -v openclaw &>/dev/null; then
+    echo "  ✅ OpenClaw $(openclaw --version 2>/dev/null | head -1)"
 else
-    echo "  ✅ OpenClaw موجود: $(openclaw --version 2>/dev/null || echo 'installed')"
+    echo -e "${RED}  ❌ openclaw لم يُثبَّت بشكل صحيح${NC}"
+    echo "  📍 جرّب: source ~/.zprofile && openclaw --version"
+    exit 1
 fi
 
 # ── 4. Dependencies ───────────────────────────────────────────
@@ -52,23 +81,13 @@ brew install git jq python3 ffmpeg 2>/dev/null || true
 pip3 install arabic-reshaper python-bidi pillow 2>/dev/null || true
 echo "  ✅ الأدوات جاهزة"
 
-# ── 5. Clone workspace ────────────────────────────────────────
-echo -e "${GREEN}[5/8] تحميل مساحة عمل MOFA...${NC}"
-mkdir -p "$HOME/.openclaw"
-if [ -d "$WORKSPACE" ]; then
-    echo "  ⚠️  Workspace موجود — نسخ احتياطي..."
-    mv "$WORKSPACE" "${WORKSPACE}.backup.$(date +%Y%m%d)"
-fi
+# ── 5. Workspace ──────────────────────────────────────────────
+echo -e "${GREEN}[5/8] تجهيز مساحة العمل...${NC}"
+mkdir -p "$WORKSPACE"
 
-git clone "$TAMKEEN_REPO" "$WORKSPACE" || {
-    echo -e "${RED}  ❌ فشل clone — تأكد من صلاحية GitHub${NC}"
-    mkdir -p "$WORKSPACE"
-}
+# ── 6. SOUL.md for MOFA ───────────────────────────────────────
+echo -e "${GREEN}[6/8] ضبط هوية المنصة (MOFA)...${NC}"
 
-# ── 6. Configure for MOFA ─────────────────────────────────────
-echo -e "${GREEN}[6/8] ضبط إعدادات MOFA...${NC}"
-
-# Create MOFA-specific SOUL.md
 cat > "$WORKSPACE/SOUL.md" << 'SOUL'
 # SOUL.md — Mizan (MOFA Edition)
 
@@ -78,30 +97,34 @@ Role: Executive Intelligence Copilot — Ministry of Foreign Affairs (MOFA UAE)
 Operating Mode: Diplomatic intelligence, OSINT, crisis monitoring
 
 ## Mission
-Support UAE MOFA operations with:
 - Real-time crisis intelligence (war.tamkeenai.ae + mofa.tamkeenai.ae)
 - Diplomat profiling and movement tracking
 - Strategic briefings for decision makers
-- HORMUZ research platform (RP-HORMUZ-2026-001)
+- Digital Diplomatic Council (port 3400)
 
-## Tone & Language
+## Tone
 - Default: Arabic (فصحى)
-- Tone: Formal, diplomatic, evidence-first
-- No jokes, no sarcasm
-
-## Hard Rules
-- No legal rulings
-- Human approval required for external actions
-- All content treated as confidential
+- Formal, diplomatic, evidence-first
 - OSINT only — cite all sources
 
 ## Organization
 Ministry of Foreign Affairs — UAE
-SOUL
-echo "  ✅ SOUL.md ضُبط لـ MOFA"
 
-# Create openclaw.json skeleton
-cat > "$HOME/.openclaw/openclaw.json" << 'CONFIG'
+## Agents
+1. ⚖️ Mizan (main) — Executive advisor
+2. 🔮 Basira — Crisis intelligence
+3. 🏗️ Moamar — Engineering
+4. 🧭 Bousla (coming) — Diplomacy
+5. 🌐 Raseef (coming) — International media
+SOUL
+
+echo "  ✅ SOUL.md جاهز"
+
+# ── 7. openclaw.json ──────────────────────────────────────────
+echo -e "${GREEN}[7/8] ضبط openclaw.json...${NC}"
+
+mkdir -p "$HOME/.openclaw"
+cat > "$HOME/.openclaw/openclaw.json" << CONFIG
 {
   "ui": {
     "seamColor": "D4AF37",
@@ -114,30 +137,16 @@ cat > "$HOME/.openclaw/openclaw.json" << 'CONFIG'
     "defaults": {
       "model": {
         "primary": "anthropic/claude-sonnet-4-6",
-        "fallbacks": ["openai/gpt-4.1", "google/gemini-2.5-pro"]
+        "fallbacks": ["openai/gpt-4.1"]
       },
-      "workspace": "WORKSPACE_PLACEHOLDER",
+      "workspace": "$WORKSPACE",
       "heartbeat": {
         "every": "30m",
         "activeHours": { "start": "07:00", "end": "23:00", "timezone": "Asia/Dubai" }
       }
     },
     "list": [
-      { "id": "main", "model": "anthropic/claude-sonnet-4-6" },
-      {
-        "id": "basira",
-        "name": "basira",
-        "workspace": "WORKSPACE_PLACEHOLDER/tamkeenai",
-        "model": "anthropic/claude-sonnet-4-6",
-        "identity": { "name": "بصيرة", "emoji": "🔮" }
-      },
-      {
-        "id": "coder",
-        "name": "coder",
-        "workspace": "WORKSPACE_PLACEHOLDER",
-        "model": "openai/gpt-4.1",
-        "identity": { "name": "معمار", "emoji": "🏗️" }
-      }
+      { "id": "main", "model": "anthropic/claude-sonnet-4-6" }
     ]
   },
   "tools": {
@@ -146,33 +155,31 @@ cat > "$HOME/.openclaw/openclaw.json" << 'CONFIG'
 }
 CONFIG
 
-# Replace placeholder with actual path
-sed -i '' "s|WORKSPACE_PLACEHOLDER|$WORKSPACE|g" "$HOME/.openclaw/openclaw.json"
 echo "  ✅ openclaw.json جاهز"
 
-# ── 7. LaunchAgent ────────────────────────────────────────────
-echo -e "${GREEN}[7/8] تسجيل LaunchAgent...${NC}"
-openclaw gateway install 2>/dev/null || true
-echo "  ✅ LaunchAgent مسجّل"
-
-# ── 8. API Keys prompt ────────────────────────────────────────
-echo -e "${GREEN}[8/8] إعداد API Keys...${NC}"
+# ── 8. Setup wizard ───────────────────────────────────────────
+echo -e "${GREEN}[8/8] إعداد نهائي...${NC}"
 echo ""
-echo -e "${GOLD}  المطلوب إضافة المفاتيح التالية:${NC}"
-echo "  1. Anthropic API Key → openclaw setup"
-echo "  2. Telegram Bot Token → openclaw setup"
-echo ""
-echo "  🔑 شغّل الآن: openclaw setup"
-echo ""
-
 echo -e "${GOLD}"
 echo "╔══════════════════════════════════════════════════════╗"
 echo "║   ✅ اكتمل الإعداد الأساسي!                         ║"
 echo "║                                                      ║"
-echo "║   الخطوة التالية:                                    ║"
-echo "║   $ openclaw setup                                   ║"
-echo "║   ثم: $ openclaw start                               ║"
+echo "║   الخطوات التالية (مرة واحدة فقط):                  ║"
+echo "║                                                      ║"
+echo "║   1) أضف API keys:                                   ║"
+echo "║      openclaw setup                                  ║"
+echo "║                                                      ║"
+echo "║   2) شغّل البوابة:                                   ║"
+echo "║      openclaw gateway start                          ║"
+echo "║                                                      ║"
+echo "║   3) ربط Telegram:                                   ║"
+echo "║      openclaw channels login --channel telegram      ║"
 echo "║                                                      ║"
 echo "║   الدعم: mizan@tamkeenai.ae                          ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo -e "${NC}"
+
+# Reminder about PATH
+echo -e "${GREEN}💡 تلميح: إذا لم يعمل 'openclaw' في terminal جديد:${NC}"
+echo "   source ~/.zprofile"
+echo ""
