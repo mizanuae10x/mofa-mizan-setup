@@ -1,8 +1,8 @@
 #!/bin/bash
 # ================================================================
-# ⚖️ MOFA Mizan Framework Setup Script v2
+# ⚖️ MOFA Mizan Framework Setup Script v3
 # التمكن والريادة لخدمات الذكاء الاصطناعي
-# وزارة الخارجية — نشر إطار عمل ميزان على Mac Mini
+# نشر إطار عمل ميزان على Mac Mini
 # ================================================================
 
 set -e
@@ -10,19 +10,18 @@ GREEN='\033[0;32m'; GOLD='\033[0;33m'; RED='\033[0;31m'; NC='\033[0m'
 
 echo -e "${GOLD}"
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║   ⚖️  MOFA Mizan Framework Setup v2 — TamkeenAI            ║"
+echo "║   ⚖️  Mizan Framework Setup v3 — TamkeenAI          ║"
 echo "║   التمكن والريادة لخدمات الذكاء الاصطناعي          ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
 WORKSPACE="$HOME/.openclaw/workspace"
-TAMKEEN_REPO="https://github.com/mizanuae10x/mofa-diplomatic-council"
+FRAMEWORK_REPO="https://github.com/mizanuae10x/mizan-framework"
 
 # ── 1. Homebrew ───────────────────────────────────────────────
 echo -e "${GREEN}[1/8] تثبيت Homebrew...${NC}"
 if ! command -v brew &>/dev/null; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Add to PATH immediately for Apple Silicon and Intel
     if [[ -f /opt/homebrew/bin/brew ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
@@ -32,17 +31,13 @@ if ! command -v brew &>/dev/null; then
     fi
 else
     echo "  ✅ Homebrew موجود: $(brew --version | head -1)"
-    # Ensure brew is in PATH
-    if [[ -f /opt/homebrew/bin/brew ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
+    if [[ -f /opt/homebrew/bin/brew ]]; then eval "$(/opt/homebrew/bin/brew shellenv)"; fi
 fi
 
 # ── 2. Node.js ────────────────────────────────────────────────
 echo -e "${GREEN}[2/8] تثبيت Node.js 22...${NC}"
 if ! command -v node &>/dev/null || [[ $(node -v 2>/dev/null | cut -d. -f1 | tr -d 'v') -lt 22 ]]; then
     brew install node@22
-    # Add node@22 to PATH immediately
     NODE_PATH="/opt/homebrew/opt/node@22/bin"
     [[ -d /usr/local/opt/node@22/bin ]] && NODE_PATH="/usr/local/opt/node@22/bin"
     export PATH="$NODE_PATH:$PATH"
@@ -53,25 +48,22 @@ else
 fi
 
 # ── 3. OpenClaw ───────────────────────────────────────────────
-echo -e "${GREEN}[3/8] تثبيت Mizan Framework...${NC}"
+echo -e "${GREEN}[3/8] تثبيت Mizan Framework (OpenClaw)...${NC}"
 
 NPM_BIN=$(npm config get prefix 2>/dev/null)/bin
 export PATH="$NPM_BIN:$PATH"
 
 if ! command -v openclaw &>/dev/null; then
-    echo "  📦 تثبيت Mizan Framework..."
+    echo "  📦 تثبيت openclaw..."
     npm install -g openclaw
-    # Reload PATH after npm global install
     export PATH="$(npm config get prefix)/bin:$PATH"
     hash -r 2>/dev/null || true
 fi
 
-# Verify openclaw is accessible
 if command -v openclaw &>/dev/null; then
-    echo "  ✅ Mizan Framework $(openclaw --version 2>/dev/null | head -1)"
+    echo "  ✅ Mizan Framework: $(openclaw --version 2>/dev/null | head -1)"
 else
-    echo -e "${RED}  ❌ openclaw لم يُثبَّت بشكل صحيح${NC}"
-    echo "  📍 جرّب: source ~/.zprofile && openclaw --version"
+    echo -e "${RED}  ❌ فشل التثبيت — جرّب: source ~/.zprofile${NC}"
     exit 1
 fi
 
@@ -81,57 +73,54 @@ brew install git jq python3 ffmpeg 2>/dev/null || true
 pip3 install arabic-reshaper python-bidi pillow 2>/dev/null || true
 echo "  ✅ الأدوات جاهزة"
 
-# ── 5. Workspace ──────────────────────────────────────────────
-echo -e "${GREEN}[5/8] تجهيز مساحة العمل...${NC}"
-mkdir -p "$WORKSPACE"
+# ── 5. Clone Mizan Framework ─────────────────────────────────
+echo -e "${GREEN}[5/8] تحميل Mizan Framework من GitHub...${NC}"
 
-# ── 6. SOUL.md for MOFA ───────────────────────────────────────
-echo -e "${GREEN}[6/8] ضبط هوية المنصة (MOFA)...${NC}"
+if [ -d "$WORKSPACE" ]; then
+    echo "  ⚠️  Workspace موجود — نسخ احتياطي..."
+    mv "$WORKSPACE" "${WORKSPACE}.backup.$(date +%Y%m%d-%H%M%S)"
+fi
 
-cat > "$WORKSPACE/SOUL.md" << 'SOUL'
-# SOUL.md — Mizan (MOFA Edition)
+git clone "$FRAMEWORK_REPO" "$WORKSPACE" && \
+    echo "  ✅ Framework محمّل بنجاح" || {
+    echo -e "${RED}  ❌ فشل clone${NC}"
+    mkdir -p "$WORKSPACE"
+    exit 1
+}
 
-## Identity
-Name: Mizan (ميزان)
-Role: Executive Intelligence Copilot — Ministry of Foreign Affairs (MOFA UAE)
-Operating Mode: Diplomatic intelligence, OSINT, crisis monitoring
+# ── 6. Customize identity ─────────────────────────────────────
+echo -e "${GREEN}[6/8] تخصيص الهوية...${NC}"
+echo ""
+echo -e "${GOLD}  ما هي الجهة؟ (مثال: MOFA، MOJ، MBZUAI — أو اضغط Enter للتخطّي)${NC}"
+read -r ORG_NAME
 
-## Mission
-- Real-time crisis intelligence (war.tamkeenai.ae + mofa.tamkeenai.ae)
-- Diplomat profiling and movement tracking
-- Strategic briefings for decision makers
-- Digital Diplomatic Council (port 3400)
+if [ -n "$ORG_NAME" ]; then
+    # Update SOUL.md with org name
+    sed -i.bak "s/\[الجهة — مثال: وزارة الخارجية، وزارة العدل\.\.\.\]/$ORG_NAME/g" "$WORKSPACE/SOUL.md" 2>/dev/null || true
+    sed -i.bak "s/\[اسم الجهة\]/$ORG_NAME/g" "$WORKSPACE/IDENTITY.md" 2>/dev/null || true
+    rm -f "$WORKSPACE/SOUL.md.bak" "$WORKSPACE/IDENTITY.md.bak" 2>/dev/null
+    echo "  ✅ الهوية: $ORG_NAME"
+else
+    echo "  ⚠️  تخطّي — عدّل ~/.openclaw/workspace/SOUL.md لاحقاً"
+fi
 
-## Tone
-- Default: Arabic (فصحى)
-- Formal, diplomatic, evidence-first
-- OSINT only — cite all sources
-
-## Organization
-Ministry of Foreign Affairs — UAE
-
-## Agents
-1. ⚖️ Mizan (main) — Executive advisor
-2. 🔮 Basira — Crisis intelligence
-3. 🏗️ Moamar — Engineering
-4. 🧭 Bousla (coming) — Diplomacy
-5. 🌐 Raseef (coming) — International media
-SOUL
-
-echo "  ✅ SOUL.md جاهز"
+# Install Mission Control dependencies
+if [ -f "$WORKSPACE/tools/basira-mission-control/package.json" ]; then
+    echo "  📦 تثبيت مكتبات بصيرة..."
+    cd "$WORKSPACE/tools/basira-mission-control"
+    npm install --silent 2>/dev/null || true
+    cp .env.example .env 2>/dev/null || true
+    cd - > /dev/null
+fi
 
 # ── 7. openclaw.json ──────────────────────────────────────────
 echo -e "${GREEN}[7/8] ضبط openclaw.json...${NC}"
-
 mkdir -p "$HOME/.openclaw"
 cat > "$HOME/.openclaw/openclaw.json" << CONFIG
 {
   "ui": {
     "seamColor": "D4AF37",
-    "assistant": {
-      "name": "ميزان",
-      "avatar": "⚖️"
-    }
+    "assistant": { "name": "ميزان", "avatar": "⚖️" }
   },
   "agents": {
     "defaults": {
@@ -149,37 +138,43 @@ cat > "$HOME/.openclaw/openclaw.json" << CONFIG
       { "id": "main", "model": "anthropic/claude-sonnet-4-6" }
     ]
   },
-  "tools": {
-    "exec": { "security": "full", "ask": "off" }
-  }
+  "tools": { "exec": { "security": "full", "ask": "off" } }
 }
 CONFIG
-
 echo "  ✅ openclaw.json جاهز"
 
-# ── 8. Setup wizard ───────────────────────────────────────────
-echo -e "${GREEN}[8/8] إعداد نهائي...${NC}"
+# ── 8. Final instructions ─────────────────────────────────────
+echo -e "${GREEN}[8/8] اكتمل الإعداد!${NC}"
 echo ""
 echo -e "${GOLD}"
 echo "╔══════════════════════════════════════════════════════╗"
-echo "║   ✅ اكتمل الإعداد الأساسي!                         ║"
+echo "║   ✅ Mizan Framework جاهز!                           ║"
 echo "║                                                      ║"
-echo "║   الخطوات التالية (مرة واحدة فقط):                  ║"
+echo "║   الخطوات التالية:                                   ║"
 echo "║                                                      ║"
-echo "║   1) أضف API keys:                                   ║"
+echo "║   1) إعداد API keys:                                 ║"
 echo "║      openclaw setup                                  ║"
 echo "║                                                      ║"
-echo "║   2) شغّل البوابة:                                   ║"
+echo "║   2) تثبيت + تشغيل البوابة:                         ║"
+echo "║      openclaw gateway install                        ║"
 echo "║      openclaw gateway start                          ║"
 echo "║                                                      ║"
 echo "║   3) ربط Telegram:                                   ║"
 echo "║      openclaw channels login --channel telegram      ║"
 echo "║                                                      ║"
-echo "║   الدعم: mizan@tamkeenai.ae                          ║"
+echo "║   4) Mission Control Dashboard:                      ║"
+echo "║      cd ~/.openclaw/workspace/tools/mission-control  ║"
+echo "║      node server.js → http://localhost:3457          ║"
+echo "║                                                      ║"
+echo "║   5) بصيرة Chat (AI):                               ║"
+echo "║      cd ~/.openclaw/workspace/tools/basira-mission-control ║"
+echo "║      nano .env  (أضف API key)                        ║"
+echo "║      node server.js → http://localhost:8521          ║"
+echo "║                                                      ║"
+echo "║   الدعم: mizan@tamkeenai.ae | tamkeenai.ae           ║"
 echo "╚══════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
-# Reminder about PATH
-echo -e "${GREEN}💡 تلميح: إذا لم يعمل 'openclaw' في terminal جديد:${NC}"
+echo -e "${GREEN}💡 إذا لم يعمل 'openclaw' في terminal جديد:${NC}"
 echo "   source ~/.zprofile"
 echo ""
