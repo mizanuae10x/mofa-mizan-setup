@@ -6,13 +6,16 @@
 # 1. إعداد أولي (مرة واحدة)
 openclaw setup
 
-# 2. تشغيل البوابة
+# 2. تثبيت البوابة كـ LaunchAgent (مرة واحدة فقط)
+openclaw gateway install
+
+# 3. تشغيل البوابة
 openclaw gateway start
 
-# 3. ربط Telegram (في terminal جديد)
+# 4. ربط Telegram (في terminal جديد)
 openclaw channels login --channel telegram
 
-# 4. التحقق من الحالة
+# 5. التحقق من الحالة
 openclaw status
 ```
 

@@ -29,7 +29,12 @@ openclaw setup
 ```
 > إذا ظهر "command not found" → شغّل: `source ~/.zprofile`
 
-### الخطوة 2: تشغيل البوابة
+### الخطوة 2: تثبيت البوابة (مرة واحدة فقط)
+```bash
+openclaw gateway install
+```
+
+### الخطوة 3: تشغيل البوابة
 ```bash
 openclaw gateway start
 ```
